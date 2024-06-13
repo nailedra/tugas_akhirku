@@ -1,0 +1,24 @@
+# Laravel & PHP specific
+/vendor/
+/node_modules/
+/public/storage
+/storage/*.key
+.env
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+/.vagrant
+
+# Laravel 5 & Lumen specific
+.env.testing
+
+# Coveralls
+.coveralls.yml
+
+# Ignore IDE files
+.idea/
+.vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db

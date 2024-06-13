@@ -1,0 +1,33 @@
+resources:
+- name: gcdm
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-c
+    machineType: zones/us-central1-c/machineTypes/e2-medium
+    disks:
+    - deviceName: gcdm
+      type: standard persistent disk
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: projects/debian-11-bullseye-v20240515
+    networkInterfaces:
+    - network: global/networks/default
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #! /bin/bash
+          sudo apt-get update
+          sudo apt-get install -y apache2 php php-mysql libapache2-mod-php
+          sudo apt-get install -y git
+          cd /var/www/html
+          sudo git clone https://github.com/user/repo.git
+          cd repo
+          sudo composer install
+          sudo cp .env.example .env
+          sudo php artisan key:generate
+          sudo service apache2 restart

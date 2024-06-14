@@ -1,0 +1,61 @@
+resources:
+- name: gcdm
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-c
+    machineType: zones/us-central1-c/machineTypes/e2-medium
+    disks:
+    - deviceName: gcdm
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: projects/debian-cloud/global/images/family/debian-11
+    networkInterfaces:
+    - network: global/networks/default
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #! /bin/bash
+          # Update and install necessary packages
+          sudo apt-get update
+          
+          # Install required dependencies for adding repositories
+          sudo apt-get install -y lsb-release apt-transport-https ca-certificates
+
+          # Add the PHP 8.1 repository
+          sudo sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+          wget -qO - https://packages.sury.org/php/apt.gpg | sudo apt-key add -
+          
+          # Update and install PHP 8.1 and necessary PHP extensions
+          sudo apt-get update
+          sudo apt-get install -y apache2 php8.1 php8.1-mysql libapache2-mod-php8.1
+
+          # Install Composer
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+          # Install git
+          sudo apt-get install -y git
+          
+          # Clone the Laravel project
+          cd /var/www/html
+          sudo git clone https://github.com/nailedra/tugas_akhirku.git
+          cd tugas_akhirku
+
+          # Install Laravel dependencies
+          sudo composer install
+
+          # Set up the environment
+          #sudo cp .env.example .env
+          #sudo php artisan key:generate
+
+          # Set appropriate permissions
+          sudo chown -R www-data:www-data /var/www/html/tugas_akhirku
+          sudo chmod -R 755 /var/www/html/tugas_akhirku
+
+          # Restart Apache to apply changes
+          sudo service apache2 restart
